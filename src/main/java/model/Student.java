@@ -19,6 +19,14 @@ public class Student {
         this.subjects = new ArrayList<>();
     }
 
+    public Student(int id, String name, String email, String password, List<Subject> subjects){
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.subjects = subjects;
+    }
+
     public int getId() {
         return id;
     }
