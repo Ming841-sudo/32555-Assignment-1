@@ -5,11 +5,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Database {
-    private final String fileName;
+    private String fileName;
 
     public Database(String fileName) {
         this.fileName = "students.data";
         createFile();
+    }
+
+    public Database() {
+
     }
 
     private void createFile(){
