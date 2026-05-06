@@ -51,7 +51,7 @@ public class Controller {
             String choice = scanner.nextLine().trim().toLowerCase();
             switch (choice) {
                 case "l":
-                    System.out.println("Student Sign In");
+                    login();
                     break;
 
                 case "r":

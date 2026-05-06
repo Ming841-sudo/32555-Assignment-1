@@ -7,14 +7,12 @@ import java.util.List;
 public class Database {
     private String fileName;
 
-    public Database(String fileName) {
+    public Database() {
         this.fileName = "students.data";
         createFile();
     }
 
-    public Database() {
 
-    }
 
     private void createFile(){
         File file = new File(fileName);
@@ -33,12 +31,12 @@ public class Database {
             String line;
 
             while ((line = read.readLine()) != null){
-                String[] mainParts = line.split("\\|");
+                String[] mainParts = line.split("\\|", -1);
 
                 String studentParts = mainParts[0];
                 String subjectParts = "";
                 if(mainParts[1].length() > 1){
-                    studentParts = mainParts[1];
+                    subjectParts = mainParts[1];
                 }
 
                 String[] studentInfo = studentParts.split(",");
