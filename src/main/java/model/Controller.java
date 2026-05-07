@@ -1,16 +1,21 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class Controller {
     private final Scanner scanner;
     private int nextStudentId;
-    private List<Student> students;
+
+
+    private Database database;
 
     public Controller() {
         this.scanner = new Scanner(System.in);
         this.nextStudentId = 1;
+
+        this.database = new Database();
     }
 
     public void start() {
@@ -46,7 +51,7 @@ public class Controller {
             String choice = scanner.nextLine().trim().toLowerCase();
             switch (choice) {
                 case "l":
-                    System.out.println("Student Sign In");
+                    login();
                     break;
 
                 case "r":
@@ -99,7 +104,7 @@ public class Controller {
             System.out.println("Email: ");
             String email = scanner.nextLine().trim();
 
-
+            List<Student> students = database.loadStudents();
             System.out.println("Password: ");
             String password = scanner.nextLine().trim();
             if (!isValidEmail(email)) {
@@ -109,12 +114,26 @@ public class Controller {
                 System.out.println("Incorrect password format");
                 continue;
             }else{
+                for (Student s : students){
+                    if(s.getEmail().equalsIgnoreCase(email)){
+                        System.out.println("Email already exist.");
+                        continue;
+                    }
+                }
+
                 System.out.println("email and password formats acceptable");
                 System.out.println(getName(email));
-                System.out.println("Enrolling Student " + getName(email));
+                System.out.println("Enrolling Student " +   getName(email));
                 Student student = new Student(nextStudentId,getName(email),email,password);
+
                 students.add(student);
+                database.saveStudents(students);
                 nextStudentId++;
+
+                System.out.println("Email and password formats acceptable");
+                System.out.println();
+                System.out.println();
+                System.out.println();
             }
 
             break;
@@ -123,7 +142,7 @@ public class Controller {
     }
 
     private boolean isValidEmail(String email){
-        String end = "university.com";
+        String end = "@university.com";
         if(email == null){
             return false;
         }
@@ -178,6 +197,36 @@ public class Controller {
         }
 
         return true;
+    }
+
+    private void login(){
+        System.out.println("Student Sign In.");
+
+        while (true){
+            System.out.println("Email: ");
+            String email = scanner.nextLine().trim();
+            System.out.println("Password: ");
+            String password = scanner.nextLine().trim();
+
+            List<Student> students = database.loadStudents();
+
+            Student loginStudent = null;
+
+            for (Student s : students){
+                if(s.getEmail().equalsIgnoreCase(email) && s.getPassword().equalsIgnoreCase(password)){
+                    loginStudent = s;
+                    break;
+                }
+            }
+
+            if(loginStudent == null){
+                System.out.println("Incorrect email or password format.");
+                continue;
+            }
+            System.out.println("email and password formats acceptable");
+            System.out.println("Welcome " + loginStudent.getName());
+            break;
+        }
     }
 
     private String getName(String email){
