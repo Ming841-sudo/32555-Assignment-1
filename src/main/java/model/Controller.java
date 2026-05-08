@@ -20,7 +20,7 @@ public class Controller {
 
     public void start() {
         boolean run = true;
-        System.out.println("Hello");
+        
         while (run) {
             System.out.print("University System: (A)dmin, (S)tudent, or X : ");
             String choice = scanner.nextLine().trim().toUpperCase();
