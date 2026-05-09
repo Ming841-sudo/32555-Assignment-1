@@ -1,16 +1,19 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class Controller {
     private final Scanner scanner;
     private int nextStudentId;
+    private Database database;
     private List<Student> students;
 
     public Controller() {
         this.scanner = new Scanner(System.in);
         this.nextStudentId = 1;
+        this.database = new Database("students.data");
     }
 
     public void start() {
@@ -66,29 +69,107 @@ public class Controller {
             System.out.print("Admin System (c/g/p/r/s/x): ");
             String choice = scanner.nextLine().trim().toLowerCase();
             switch (choice){
+
                 case "c":
                     System.out.println("Clearing students database");
-                    // TODO
+                    database.saveStudents(new ArrayList<>());
+                    System.out.println("Students data cleared.");
                     break;
+
                 case "g":
                     System.out.println("Grade Grouping");
-                    // TODO
+                    List<Student> gStudents = database.loadStudents();
+                    String[] grades = {"HD", "D", "C", "P", "F"};
+                    for (String grade : grades) {
+                        List<String> entries = new ArrayList<>();
+                        for (Student s : gStudents) {
+                            for (Subject sub : s.getSubjects()) {
+                                if (sub.getGrade().equalsIgnoreCase(grade)) {
+                                    entries.add(s.getName() + " :: " + sub.getMark() + " -- " + sub.getGrade());
+                                }
+                            }
+                        }
+                        if (!entries.isEmpty()) {
+                            System.out.println("[" + grade + "]");
+                            for (String e : entries) {
+                                System.out.println("  " + e);
+                            }
+                        }
+                    }
                     break;
+
                 case "p":
                     System.out.println("PASS/FAIL Partition");
-                    // TODO
+                    List<Student> pStudents = database.loadStudents();
+                    List<Student> passing = new ArrayList<>();
+                    List<Student> failing = new ArrayList<>();
+                    for (Student s : pStudents) {
+                        List<Subject> subs = s.getSubjects();
+                        if (subs.isEmpty()) continue;
+                        double total = 0;
+                        for (Subject sub : subs) total += sub.getMark();
+                        double avg = total / subs.size();
+                        if (avg >= 50) passing.add(s);
+                        else failing.add(s);
+                    }
+                    System.out.println("PASS (" + passing.size() + "):");
+                    for (Student s : passing) {
+                        double total = 0;
+                        for (Subject sub : s.getSubjects()) total += sub.getMark();
+                        System.out.printf("  %s avg: %.1f%n", s.getName(), total / s.getSubjects().size());
+                    }
+                    System.out.println("FAIL (" + failing.size() + "):");
+                    for (Student s : failing) {
+                        double total = 0;
+                        for (Subject sub : s.getSubjects()) total += sub.getMark();
+                        System.out.printf("  %s avg: %.1f%n", s.getName(), total / s.getSubjects().size());
+                    }
                     break;
+
                 case "r":
                     System.out.print("Remove by ID: ");
-                    // TODO
+                    String input = scanner.nextLine().trim();
+                    int targetId;
+                    try {
+                        targetId = Integer.parseInt(input);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid ID.");
+                        break;
+                    }
+                    List<Student> rStudents = database.loadStudents();
+                    Student toRemove = null;
+                    for (Student s : rStudents) {
+                        if (s.getId() == targetId) {
+                            toRemove = s;
+                            break;
+                        }
+                    }
+                    if (toRemove == null) {
+                        System.out.println("Student ID " + targetId + " not found.");
+                    } else {
+                        rStudents.remove(toRemove);
+                        database.saveStudents(rStudents);
+                        System.out.println(toRemove.getName() + " removed.");
+                    }
                     break;
+
                 case "s":
                     System.out.println("Student List");
-                    // TODO
+                    List<Student> sStudents = database.loadStudents();
+                    if (sStudents.isEmpty()) {
+                        System.out.println("No students found.");
+                        break;
+                    }
+                    for (Student s : sStudents) {
+                        System.out.println("  ID: " + s.getFormattedId()
+                                + " | Name: " + s.getName()
+                                + " | Email: " + s.getEmail()
+                                + " | Subjects: " + s.getSubjects().size());
+                    }
                     break;
+
                 case "x":
                     run = false;
-
                     break;
             }
         }

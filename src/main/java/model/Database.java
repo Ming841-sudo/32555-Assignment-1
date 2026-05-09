@@ -34,7 +34,7 @@ public class Database {
                 String studentParts = mainParts[0];
                 String subjectParts = "";
                 if(mainParts[1].length() > 1){
-                    studentParts = mainParts[1];
+                    subjectParts = mainParts[1];
                 }
 
                 String[] studentInfo = studentParts.split(",");
