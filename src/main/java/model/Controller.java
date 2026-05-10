@@ -65,12 +65,13 @@ public class Controller {
             }
         }
     }
-    private void showAdminMenu(){
+
+    private void showAdminMenu() {
         boolean run = true;
-        while (run){
+        while (run) {
             System.out.print("Admin System (c/g/p/r/s/x): ");
             String choice = scanner.nextLine().trim().toLowerCase();
-            switch (choice){
+            switch (choice) {
                 case "c":
                     System.out.println("Clearing students database");
                     // TODO
@@ -98,7 +99,8 @@ public class Controller {
             }
         }
     }
-    private void register(){
+
+    private void register() {
         System.out.println("Student Sign Up");
         while (true) {
             System.out.println("Email: ");
@@ -113,9 +115,9 @@ public class Controller {
             } else if (!isValidPassword(password)) {
                 System.out.println("Incorrect password format");
                 continue;
-            }else{
-                for (Student s : students){
-                    if(s.getEmail().equalsIgnoreCase(email)){
+            } else {
+                for (Student s : students) {
+                    if (s.getEmail().equalsIgnoreCase(email)) {
                         System.out.println("Email already exist.");
                         continue;
                     }
@@ -123,8 +125,8 @@ public class Controller {
 
                 System.out.println("email and password formats acceptable");
                 System.out.println(getName(email));
-                System.out.println("Enrolling Student " +   getName(email));
-                Student student = new Student(nextStudentId,getName(email),email,password);
+                System.out.println("Enrolling Student " + getName(email));
+                Student student = new Student(nextStudentId, getName(email), email, password);
 
                 students.add(student);
                 database.saveStudents(students);
@@ -141,68 +143,68 @@ public class Controller {
 
     }
 
-    private boolean isValidEmail(String email){
+    private boolean isValidEmail(String email) {
         String end = "@university.com";
-        if(email == null){
+        if (email == null) {
             return false;
         }
 
-        if(!email.endsWith(end)){
+        if (!email.endsWith(end)) {
             return false;
         }
 
         String begin = email.substring(0, email.length() - end.length());
 
         int index = begin.indexOf('.');
-        if(index == -1){
+        if (index == -1) {
             return false;
         }
-        if(begin.indexOf('.', index + 1) != -1){
+        if (begin.indexOf('.', index + 1) != -1) {
             return false;
         }
-        if(index == 0 || index == begin.length() - 1){
+        if (index == 0 || index == begin.length() - 1) {
             return false;
         }
         return true;
 
     }
 
-    private boolean isValidPassword(String password){
-        if(password == null || password.length() < 8){
+    private boolean isValidPassword(String password) {
+        if (password == null || password.length() < 8) {
             return false;
         }
 
-        if(!Character.isUpperCase(password.charAt(0))){
+        if (!Character.isUpperCase(password.charAt(0))) {
             return false;
         }
 
         int letter = 0;
         int number = 0;
 
-        for(char c : password.toCharArray()){
-            if (Character.isLetter(c)){
+        for (char c : password.toCharArray()) {
+            if (Character.isLetter(c)) {
                 letter++;
             } else if (Character.isDigit(c)) {
                 number++;
-                
+
             }
         }
 
-        if(letter < 5){
+        if (letter < 5) {
             return false;
         }
 
-        if(number < 3){
+        if (number < 3) {
             return false;
         }
 
         return true;
     }
 
-    private void login(){
+    private void login() {
         System.out.println("Student Sign In.");
 
-        while (true){
+        while (true) {
             System.out.println("Email: ");
             String email = scanner.nextLine().trim();
             System.out.println("Password: ");
@@ -212,36 +214,116 @@ public class Controller {
 
             Student loginStudent = null;
 
-            for (Student s : students){
-                if(s.getEmail().equalsIgnoreCase(email) && s.getPassword().equalsIgnoreCase(password)){
+            for (Student s : students) {
+                if (s.getEmail().equalsIgnoreCase(email) && s.getPassword().equalsIgnoreCase(password)) {
                     loginStudent = s;
                     break;
                 }
             }
 
-            if(loginStudent == null){
+            if (loginStudent == null) {
                 System.out.println("Incorrect email or password format.");
                 continue;
             }
             System.out.println("email and password formats acceptable");
             System.out.println("Welcome " + loginStudent.getName());
+            showSubjectMenu(loginStudent, students);
             break;
         }
     }
 
-    private String getName(String email){
+    private String getName(String email) {
         String end = "@university.com";
 
 
         String begin = email.substring(0, email.length() - end.length());
         String[] parts = begin.split("\\.");
 
-        String firstName = parts[0].substring(0,1).toUpperCase() + parts[0].substring(1).toLowerCase();
-        String lastName = parts[1].substring(0,1).toUpperCase() + parts[1].substring(1).toLowerCase();
+        String firstName = parts[0].substring(0, 1).toUpperCase() + parts[0].substring(1).toLowerCase();
+        String lastName = parts[1].substring(0, 1).toUpperCase() + parts[1].substring(1).toLowerCase();
 
         return firstName + " " + lastName;
     }
 
+    private void showSubjectMenu(Student student, List<Student> students) {
+        boolean run = true;
+
+        while (run) {
+            System.out.print("Student Course Menu (c/e/r/s/x): ");
+            String choice = scanner.nextLine().trim().toLowerCase();
+
+            switch (choice) {
+                case "c":
+                    changePassword(student, students);
+                    break;
+
+                case "e":
+                    Subject subject = new Subject();
+                    student.getSubjects().add(subject);
+                    database.saveStudents(students);
+                    System.out.println("Enrolled: " + subject);
+                    break;
+
+                case "r":
+                    System.out.print("Remove Subject by ID: ");
+                    int id = Integer.parseInt(scanner.nextLine().trim());
+
+                    Subject removeSubject = null;
+                    for (Subject s : student.getSubjects()) {
+                        if (s.getID() == id) {
+                            removeSubject = s;
+                            break;
+                        }
+                    }
+
+                    if (removeSubject != null) {
+                        student.getSubjects().remove(removeSubject);
+                        database.saveStudents(students);
+                        System.out.println("Subject removed.");
+                    } else {
+                        System.out.println("Subject not found.");
+                    }
+                    break;
+
+                case "s":
+
+                    System.out.println(
+                            "Showing " + student.getSubjects().size() + " subjects"
+                    );
+
+                    for (Subject s : student.getSubjects()) {
+                        System.out.println(s);
+                    }
+
+                    break;
+
+                case "x":
+                    run = false;
+                    break;
+
+                default:
+                    System.out.println("Invalid option.");
+            }
+        }
+    }
+
+    private void changePassword(Student student, List<Student> students) {
+
+        System.out.print("New Password: ");
+
+        String newPassword = scanner.nextLine().trim();
+
+        if (!isValidPassword(newPassword)) {
+
+            System.out.println("Incorrect password format");
+
+            return;
+        }
+
+        student.resetPassword(newPassword);
+
+        database.saveStudents(students);
+
+        System.out.println("Password updated successfully");
+    }
 }
-
-
