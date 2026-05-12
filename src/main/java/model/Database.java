@@ -5,12 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Database {
-    private final String fileName;
+    private String fileName;
 
-    public Database(String fileName) {
+    public Database() {
         this.fileName = "students.data";
         createFile();
     }
+
+
 
     private void createFile(){
         File file = new File(fileName);
@@ -29,7 +31,7 @@ public class Database {
             String line;
 
             while ((line = read.readLine()) != null){
-                String[] mainParts = line.split("\\|");
+                String[] mainParts = line.split("\\|", -1);
 
                 String studentParts = mainParts[0];
                 String subjectParts = "";
