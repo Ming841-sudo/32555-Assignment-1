@@ -11,6 +11,45 @@ public class Subject {
         this.grade = grade;
     }
 
+    public Subject(int subjectID) {
+
+        java.util.Random random = new java.util.Random();
+
+        this.subjectID = random.nextInt(999) + 1;
+
+        this.mark = random.nextInt(76) + 25;
+
+        this.grade = calculateGrade(this.mark);
+    }
+
+    public static String calculateGrade(double mark) {
+
+        if (mark >= 85) {
+            return "HD";
+        } else if (mark >= 75) {
+            return "D";
+        } else if (mark >= 65) {
+            return "C";
+        } else if (mark >= 50) {
+            return "P";
+        } else {
+            return "F";
+        }
+    }
+
+    @Override
+    public String toString() {
+
+        return "[ Subject::"
+                + String.format("%03d", subjectID)
+                + " -- mark = "
+                + String.format("%.0f", mark)
+                + " -- grade = "
+                + grade
+                + " ]";
+    }
+
+
     public int getID(){
         return subjectID;
     }

@@ -2,18 +2,19 @@ package model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
 
 public class Controller {
     private final Scanner scanner;
-    private int nextStudentId;
+
     private Database database;
     private List<Student> students;
 
     public Controller() {
         this.scanner = new Scanner(System.in);
-        this.nextStudentId = 1;
-        this.database = new Database("students.data");
+
+        this.database = new Database();
     }
 
     public void start() {
@@ -45,7 +46,7 @@ public class Controller {
     private void showStudentMenu() {
         boolean run = true;
         while (run) {
-            System.out.println("Student System (l/r/x): ");
+            System.out.print("Student System (l/r/x): ");
             String choice = scanner.nextLine().trim().toLowerCase();
             switch (choice) {
                 case "l":
@@ -63,6 +64,35 @@ public class Controller {
             }
         }
     }
+
+    private int generateUniqueStudentId() {
+
+        Random random = new java.util.Random();
+
+        int id;
+        boolean exists;
+
+        List<Student> students = database.loadStudents();
+
+        do {
+
+            id = random.nextInt(999999) + 1;
+
+            exists = false;
+
+            for (Student s : students) {
+
+                if (s.getId() == id) {
+
+                    exists = true;
+                    break;
+                }
+            }
+
+        } while (exists);
+
+        return id;
+    }
     private void showAdminMenu(){
         boolean run = true;
         while (run){
@@ -71,59 +101,101 @@ public class Controller {
             switch (choice){
 
                 case "c":
+
                     System.out.println("Clearing students database");
-                    database.saveStudents(new ArrayList<>());
-                    System.out.println("Students data cleared.");
+
+                    while (true) {
+
+                        System.out.print(
+                                "Are you sure you want to clear the database (Y)ES/(N)O: "
+                        );
+
+                        String confirm = scanner.nextLine().trim().toUpperCase();
+
+                        if (confirm.equals("Y")) {
+
+                            database.saveStudents(new ArrayList<>());
+
+                            System.out.println("Students data cleared.");
+
+                            break;
+
+                        } else if (confirm.equals("N")) {
+
+
+
+                            break;
+
+                        } else {
+
+                            System.out.println("Invalid option.");
+
+                        }
+                    }
+
                     break;
 
                 case "g":
                     System.out.println("Grade Grouping");
+
                     List<Student> gStudents = database.loadStudents();
                     String[] grades = {"HD", "D", "C", "P", "F"};
+                    boolean isEmpty = false;
                     for (String grade : grades) {
                         List<String> entries = new ArrayList<>();
+
                         for (Student s : gStudents) {
-                            for (Subject sub : s.getSubjects()) {
-                                if (sub.getGrade().equalsIgnoreCase(grade)) {
-                                    entries.add(s.getName() + " :: " + sub.getMark() + " -- " + sub.getGrade());
-                                }
+                            if (s.getSubjects().isEmpty()) {
+                                continue;
+                            }
+
+                            double avg = getAverageMark(s);
+                            String finalGrade = Subject.calculateGrade(avg);
+
+                            if (finalGrade.equalsIgnoreCase(grade)) {
+                                entries.add(formatStudentResult(s));
                             }
                         }
+
                         if (!entries.isEmpty()) {
-                            System.out.println("[" + grade + "]");
-                            for (String e : entries) {
-                                System.out.println("  " + e);
-                            }
+                            isEmpty = true;
+                            System.out.println(grade + " --> [" + String.join(", ", entries) + "]");
                         }
+
                     }
+                    if (!isEmpty){
+                        System.out.println("< Nothing to display >");
+                    }
+
                     break;
 
                 case "p":
                     System.out.println("PASS/FAIL Partition");
+
                     List<Student> pStudents = database.loadStudents();
-                    List<Student> passing = new ArrayList<>();
-                    List<Student> failing = new ArrayList<>();
+                    List<String> passEntries = new ArrayList<>();
+                    List<String> failEntries = new ArrayList<>();
+
                     for (Student s : pStudents) {
-                        List<Subject> subs = s.getSubjects();
-                        if (subs.isEmpty()) continue;
-                        double total = 0;
-                        for (Subject sub : subs) total += sub.getMark();
-                        double avg = total / subs.size();
-                        if (avg >= 50) passing.add(s);
-                        else failing.add(s);
+                        if (s.getSubjects().isEmpty()) {
+                            continue;
+                        }
+
+                        double avg = getAverageMark(s);
+
+                        if (avg >= 50) {
+                            passEntries.add(formatStudentResult(s));
+                        } else {
+                            failEntries.add(formatStudentResult(s));
+                        }
                     }
-                    System.out.println("PASS (" + passing.size() + "):");
-                    for (Student s : passing) {
-                        double total = 0;
-                        for (Subject sub : s.getSubjects()) total += sub.getMark();
-                        System.out.printf("  %s avg: %.1f%n", s.getName(), total / s.getSubjects().size());
+                    if(!passEntries.isEmpty() || !failEntries.isEmpty()){
+                        System.out.println("FAIL --> [" + String.join(", ", failEntries) + "]");
+                        System.out.println("PASS --> [" + String.join(", ", passEntries) + "]");
+                    }else{
+                        System.out.println("< Nothing to display >");
                     }
-                    System.out.println("FAIL (" + failing.size() + "):");
-                    for (Student s : failing) {
-                        double total = 0;
-                        for (Subject sub : s.getSubjects()) total += sub.getMark();
-                        System.out.printf("  %s avg: %.1f%n", s.getName(), total / s.getSubjects().size());
-                    }
+
                     break;
 
                 case "r":
@@ -145,11 +217,11 @@ public class Controller {
                         }
                     }
                     if (toRemove == null) {
-                        System.out.println("Student ID " + targetId + " not found.");
+                        System.out.println("Student " + targetId + " does not exist");
                     } else {
                         rStudents.remove(toRemove);
                         database.saveStudents(rStudents);
-                        System.out.println(toRemove.getName() + " removed.");
+                        System.out.println("Removing Student " + toRemove.getId() + " Account");
                     }
                     break;
 
@@ -157,14 +229,11 @@ public class Controller {
                     System.out.println("Student List");
                     List<Student> sStudents = database.loadStudents();
                     if (sStudents.isEmpty()) {
-                        System.out.println("No students found.");
+                        System.out.println("< Nothing to display >");
                         break;
                     }
                     for (Student s : sStudents) {
-                        System.out.println("  ID: " + s.getFormattedId()
-                                + " | Name: " + s.getName()
-                                + " | Email: " + s.getEmail()
-                                + " | Subjects: " + s.getSubjects().size());
+                        System.out.println(s.getName() + " :: " + s.getId()  + " --> Email: " + s.getEmail());
                     }
                     break;
 
@@ -177,11 +246,11 @@ public class Controller {
     private void register(){
         System.out.println("Student Sign Up");
         while (true) {
-            System.out.println("Email: ");
+            System.out.print("Email: ");
             String email = scanner.nextLine().trim();
 
             List<Student> students = database.loadStudents();
-            System.out.println("Password: ");
+            System.out.print("Password: ");
             String password = scanner.nextLine().trim();
             if (!isValidEmail(email)) {
                 System.out.println("Incorrect email format");
@@ -198,18 +267,16 @@ public class Controller {
                 }
 
                 System.out.println("email and password formats acceptable");
-                System.out.println(getName(email));
+                System.out.println("Name: " + getName(email));
                 System.out.println("Enrolling Student " +   getName(email));
-                Student student = new Student(nextStudentId,getName(email),email,password);
+                int id = generateUniqueStudentId();
+                Student student = new Student(id,getName(email),email,password);
 
                 students.add(student);
                 database.saveStudents(students);
-                nextStudentId++;
 
-                System.out.println("Email and password formats acceptable");
-                System.out.println();
-                System.out.println();
-                System.out.println();
+
+
             }
 
             break;
@@ -279,11 +346,14 @@ public class Controller {
         System.out.println("Student Sign In.");
 
         while (true){
-            System.out.println("Email: ");
+            System.out.print("Email: ");
             String email = scanner.nextLine().trim();
-            System.out.println("Password: ");
+            System.out.print("Password: ");
             String password = scanner.nextLine().trim();
-
+            if (!isValidEmail(email) || !isValidPassword(password)) {
+                System.out.println("Incorrect email or password format.");
+                continue;
+            }
             List<Student> students = database.loadStudents();
 
             Student loginStudent = null;
@@ -296,13 +366,177 @@ public class Controller {
             }
 
             if(loginStudent == null){
-                System.out.println("Incorrect email or password format.");
+                System.out.println("email and password formats acceptable");
+                System.out.println("Student does not exist");
                 continue;
             }
             System.out.println("email and password formats acceptable");
             System.out.println("Welcome " + loginStudent.getName());
+            showSubjectMenu(loginStudent,students);
             break;
         }
+    }
+
+    private void showSubjectMenu(Student student, List<Student> students) {
+        boolean run = true;
+
+        while (run) {
+            System.out.print("Student Course Menu (c/e/r/s/x): ");
+            String choice = scanner.nextLine().trim().toLowerCase();
+
+            switch (choice) {
+                case "c":
+                    changePassword(student, students);
+                    break;
+
+                case "e":
+                    if(student.getSubjects().size() >= 4){
+                        System.out.println("Students are allowed to enrol in 4 subjects only");
+                        break;
+                    }
+                    int subjectID = generateUniqueSubjectId(student);
+
+                    Subject subject = new Subject(subjectID);
+                    student.getSubjects().add(subject);
+                    database.saveStudents(students);
+                    System.out.println("Enrolling in Subject-" + subject.getID());
+                    System.out.println("You are now enrolled in " +  student.getSubjects().size() + " out of 4 subjects");
+                    break;
+
+                case "r":
+                    System.out.print("Remove Subject by ID: ");
+
+                    try {
+                        int id = Integer.parseInt(scanner.nextLine().trim());
+
+                        Subject removeSubject = null;
+
+                        for (Subject s : student.getSubjects()) {
+                            if (s.getID() == id) {
+                                removeSubject = s;
+                                break;
+                            }
+                        }
+
+                        if (removeSubject != null) {
+                            student.getSubjects().remove(removeSubject);
+
+                            database.saveStudents(students);
+
+                            System.out.println("Droping Subject-" + removeSubject.getID());
+                            System.out.println("You are now enrolled in " +  student.getSubjects().size() + " out of 4 subjects");
+                        } else {
+                            System.out.println("Subject not found.");
+                        }
+
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid subject ID.");
+                    }
+
+                    break;
+
+                case "s":
+
+                    System.out.println(
+                            "Showing " + student.getSubjects().size() + " subjects"
+                    );
+
+                    for (Subject s : student.getSubjects()) {
+                        System.out.println(s);
+                    }
+
+                    break;
+
+                case "x":
+                    run = false;
+                    break;
+
+                default:
+                    System.out.println("Invalid option.");
+            }
+        }
+    }
+
+    private void changePassword(Student student, List<Student> students) {
+        System.out.println("Updating Password");
+
+        System.out.print("New Password: ");
+
+        String newPassword = scanner.nextLine().trim();
+        System.out.print("Confirm Password: ");
+
+
+        if (!isValidPassword(newPassword)) {
+
+            System.out.println("Incorrect password format");
+
+            return;
+        }
+        while (true) {
+
+            System.out.print("Confirm Password: ");
+            String confirmPassword = scanner.nextLine().trim();
+
+            if (!newPassword.equals(confirmPassword)) {
+
+                System.out.println("Password does not match -- try again");
+
+                continue;
+            }
+
+
+            student.resetPassword(newPassword);
+
+            database.saveStudents(students);
+
+
+
+            break;
+        }
+
+
+    }
+
+    private int generateUniqueSubjectId(Student student) {
+        java.util.Random random = new java.util.Random();
+
+        int id;
+        boolean exists;
+
+        do {
+            id = random.nextInt(999) + 1;
+            exists = false;
+
+            for (Subject s : student.getSubjects()) {
+                if (s.getID() == id) {
+                    exists = true;
+                    break;
+                }
+            }
+
+        } while (exists);
+
+        return id;
+    }
+
+    private double getAverageMark(Student student) {
+        if (student.getSubjects().isEmpty()) {
+            return 0;
+        }
+
+        double total = 0;
+        for (Subject subject : student.getSubjects()) {
+            total += subject.getMark();
+        }
+
+        return total / student.getSubjects().size();
+    }
+
+    private String formatStudentResult(Student student) {
+        double avg = getAverageMark(student);
+        String grade = Subject.calculateGrade(avg);
+
+        return student.getName() + " :: " + student.getFormattedId() + " --> GRADE: " + grade + " - MARK: " + String.format("%.2f", avg);
     }
 
     private String getName(String email){
