@@ -381,7 +381,7 @@ public class Controller {
             Student loginStudent = null;
 
             for (Student s : students){
-                if(s.getEmail().equalsIgnoreCase(email) && s.getPassword().equals(password)){
+                if(s.getEmail().equals(email) && s.getPassword().equals(password)){
                     loginStudent = s;
                     break;
                 }
@@ -558,7 +558,7 @@ public class Controller {
         double avg = getAverageMark(student);
         String grade = Subject.calculateGrade(avg);
 
-        return student.getName() + " :: " + student.getFormattedId() + " --> GRADE: " + grade + " - MARK: " + String.format("%.2f", avg);
+        return student.getName() + " :: " + student.getId() + " --> GRADE: " + grade + " - MARK: " + String.format("%.2f", avg);
     }
 
     private String getName(String email){
