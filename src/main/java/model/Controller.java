@@ -65,24 +65,27 @@ public class Controller {
         }
     }
 
-    private int generateUniqueStudentId() {
+    private String generateUniqueStudentId() {
 
-        Random random = new java.util.Random();
+        Random random = new Random();
 
-        int id;
+        String id;
+
         boolean exists;
 
         List<Student> students = database.loadStudents();
 
         do {
 
-            id = random.nextInt(999999) + 1;
+            int number = random.nextInt(999999) + 1;
+
+            id = String.format("%06d", number);
 
             exists = false;
 
             for (Student s : students) {
 
-                if (s.getId() == id) {
+                if (s.getId().equals(id)) {
 
                     exists = true;
                     break;
@@ -199,30 +202,43 @@ public class Controller {
                     break;
 
                 case "r":
+
                     System.out.print("Remove by ID: ");
-                    String input = scanner.nextLine().trim();
-                    int targetId;
-                    try {
-                        targetId = Integer.parseInt(input);
-                    } catch (NumberFormatException e) {
-                        System.out.println("Invalid ID.");
-                        break;
-                    }
+
+                    String targetId = scanner.nextLine().trim();
+
                     List<Student> rStudents = database.loadStudents();
+
                     Student toRemove = null;
+
                     for (Student s : rStudents) {
-                        if (s.getId() == targetId) {
+
+                        if (s.getId().equals(targetId)) {
+
                             toRemove = s;
                             break;
                         }
                     }
+
                     if (toRemove == null) {
-                        System.out.println("Student " + targetId + " does not exist");
+
+                        System.out.println(
+                                "Student " + targetId + " does not exist"
+                        );
+
                     } else {
+
                         rStudents.remove(toRemove);
+
                         database.saveStudents(rStudents);
-                        System.out.println("Removing Student " + toRemove.getId() + " Account");
+
+                        System.out.println(
+                                "Removing Student "
+                                        + toRemove.getId()
+                                        + " Account"
+                        );
                     }
+
                     break;
 
                 case "s":
@@ -259,17 +275,23 @@ public class Controller {
                 System.out.println("Incorrect password format");
                 continue;
             }else{
+                boolean exists = false;
                 for (Student s : students){
                     if(s.getEmail().equalsIgnoreCase(email)){
-                        System.out.println("Email already exist.");
-                        continue;
+
+                        exists = true;
+                        break;
                     }
+                }
+                if(exists){
+                    System.out.println("Email already exist.");
+                    continue;
                 }
 
                 System.out.println("email and password formats acceptable");
                 System.out.println("Name: " + getName(email));
                 System.out.println("Enrolling Student " +   getName(email));
-                int id = generateUniqueStudentId();
+                String id = generateUniqueStudentId();
                 Student student = new Student(id,getName(email),email,password);
 
                 students.add(student);
@@ -359,7 +381,7 @@ public class Controller {
             Student loginStudent = null;
 
             for (Student s : students){
-                if(s.getEmail().equalsIgnoreCase(email) && s.getPassword().equalsIgnoreCase(password)){
+                if(s.getEmail().equalsIgnoreCase(email) && s.getPassword().equals(password)){
                     loginStudent = s;
                     break;
                 }

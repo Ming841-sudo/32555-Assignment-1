@@ -5,13 +5,13 @@ import java.util.List;
 
 public class Student {
     private static final int max_Subject = 4;
-    private int id;
+    private String id;
     private String name;
     private String email;
     private String password;
     private List<Subject> subjects;
 
-    public Student(int id, String name, String email, String password){
+    public Student(String id, String name, String email, String password){
         this.id = id;
         this.name = name;
         this.email = email;
@@ -19,7 +19,7 @@ public class Student {
         this.subjects = new ArrayList<>();
     }
 
-    public Student(int id, String name, String email, String password, List<Subject> subjects){
+    public Student(String id, String name, String email, String password, List<Subject> subjects){
         this.id = id;
         this.name = name;
         this.email = email;
@@ -27,7 +27,7 @@ public class Student {
         this.subjects = subjects;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
