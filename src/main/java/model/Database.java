@@ -25,49 +25,78 @@ public class Database {
         }
     }
 
-    public List<Student> loadStudents(){
+    public List<Student> loadStudents() {
+
         List<Student> students = new ArrayList<>();
-        try (BufferedReader read = new BufferedReader(new FileReader(fileName))){
+
+        try (BufferedReader read =
+                     new BufferedReader(new FileReader(fileName))) {
+
             String line;
 
-            while ((line = read.readLine()) != null){
+            while ((line = read.readLine()) != null) {
+
                 String[] mainParts = line.split("\\|", -1);
 
                 String studentParts = mainParts[0];
+
                 String subjectParts = "";
-                if(mainParts[1].length() > 1){
+
+                if (mainParts[1].length() > 1) {
                     subjectParts = mainParts[1];
                 }
 
                 String[] studentInfo = studentParts.split(",");
 
-                int id = Integer.parseInt(studentInfo[0]);
+                String id = studentInfo[0];
+
                 String name = studentInfo[1];
+
                 String email = studentInfo[2];
+
                 String password = studentInfo[3];
 
                 List<Subject> subjects = new ArrayList<>();
-                if(!subjectParts.isEmpty()){
+
+                if (!subjectParts.isEmpty()) {
+
                     String[] subjectsInfo = subjectParts.split(";");
 
-                    for(String item : subjectsInfo){
-                        if(item.trim().isEmpty()){
+                    for (String item : subjectsInfo) {
+
+                        if (item.trim().isEmpty()) {
                             continue;
                         }
 
                         String[] subjectField = item.split(":");
-                        int subjectID = Integer.parseInt(subjectField[0]);
-                        double mark = Double.parseDouble(subjectField[1]);
+
+                        int subjectID =
+                                Integer.parseInt(subjectField[0]);
+
+                        double mark =
+                                Double.parseDouble(subjectField[1]);
+
                         String grade = subjectField[2];
 
-                        subjects.add(new Subject(subjectID, mark, grade));
-
+                        subjects.add(
+                                new Subject(subjectID, mark, grade)
+                        );
                     }
                 }
 
-                students.add(new Student(id,name, email, password, subjects));
+                students.add(
+                        new Student(
+                                id,
+                                name,
+                                email,
+                                password,
+                                subjects
+                        )
+                );
             }
+
         } catch (IOException e) {
+
             System.out.println("Error reading file.");
         }
 
