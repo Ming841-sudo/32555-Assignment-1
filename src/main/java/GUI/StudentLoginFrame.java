@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 
-// Student login interface
+// Student Login Interface
 public class StudentLoginFrame {
     
     // Path to student data file (students.data in current directory)
@@ -20,7 +20,7 @@ public class StudentLoginFrame {
         
         // Create login window
         JFrame studentFrame = new JFrame("Student Login");
-        // Key modification: exit the entire program when the window is closed
+        // Critical setting: exit the entire program when window is closed
         studentFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         studentFrame.setSize(500, 400);
         
@@ -35,7 +35,7 @@ public class StudentLoginFrame {
         titleLabel.setFont(titleFont);
         titleLabel.setForeground(Color.PINK);
         titleLabel.setBorder(BorderFactory.createEmptyBorder(40, 0, 30, 0));
-        // Add title label to the top of the main panel
+        // Add title label to the top of main panel
         mainPanel.add(titleLabel, BorderLayout.NORTH);
         
         // Create form panel
@@ -44,7 +44,7 @@ public class StudentLoginFrame {
         formPanel.setLayout(new GridBagLayout());
         formPanel.setBackground(Color.WHITE);
         
-        // Create layout constraints object
+        // Create layout constraint object
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
         
@@ -52,14 +52,14 @@ public class StudentLoginFrame {
         Font labelFont = new Font("Times New Roman", Font.PLAIN, 18);
         Font fieldFont = new Font("Times New Roman", Font.PLAIN, 18);
         
-        // Account input row
+        // Email input row
         // Create email label
         JLabel accountLabel = new JLabel("Email Account:");
         accountLabel.setFont(labelFont);
         accountLabel.setForeground(Color.BLACK);
         gbc.gridx = 0;
         gbc.gridy = 0;
-        // Right align
+        // Right alignment
         gbc.anchor = GridBagConstraints.EAST;
         formPanel.add(accountLabel, gbc);
         
@@ -68,7 +68,7 @@ public class StudentLoginFrame {
         accountField.setFont(fieldFont);
         gbc.gridx = 1;
         gbc.gridy = 0;
-        // Left align
+        // Left alignment
         gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(accountField, gbc);
         
@@ -90,7 +90,7 @@ public class StudentLoginFrame {
         gbc.anchor = GridBagConstraints.WEST;
         formPanel.add(passwordField, gbc);
         
-        // Add form panel to the center of the main panel
+        // Add form panel to the center of main panel
         mainPanel.add(formPanel, BorderLayout.CENTER);
         
         // Create button panel
@@ -111,7 +111,7 @@ public class StudentLoginFrame {
             String email = accountField.getText();
             String password = new String(passwordField.getPassword());
             
-            // Validate that input is not empty
+            // Validate that inputs are not empty
             if (email.isEmpty() || password.isEmpty()) {
                 // Show error dialog
                 JOptionPane.showMessageDialog(studentFrame, 
@@ -124,11 +124,11 @@ public class StudentLoginFrame {
             // Validate user from data file
             String validationResult = validateUserFromDataFile(email, password);
             
-            // Handle validation result
+            // Process validation result
             if (validationResult.equals("SUCCESS")) {
                 // Login successful, close current login window
                 studentFrame.dispose();
-                // Open student main interface, pass in login email
+                // Open student main interface, passing the logged-in email
                 StudentMainFrame.showStudentMain(email);
             } else if (validationResult.equals("PASSWORD_ERROR")) {
                 // Password error: show error message and clear password field
@@ -155,7 +155,7 @@ public class StudentLoginFrame {
         // Add login button to button panel
         buttonPanel.add(loginButton);
         
-        // Add button panel to the bottom of the main panel
+        // Add button panel to the bottom of main panel
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
         
         // Set main panel as the content pane of the window
@@ -186,10 +186,6 @@ public class StudentLoginFrame {
             
             // Read file line by line
             while ((line = reader.readLine()) != null) {
-                // Skip empty lines
-                if (line.trim().isEmpty()) {
-                    continue;
-                }
                 
                 // Split by vertical bar
                 String[] parts = line.split("\\|");
@@ -199,18 +195,18 @@ public class StudentLoginFrame {
                 
                 // Get basic student information
                 String[] studentInfo = parts[0].split(",");
-                // Ensure at least 4 fields (Student ID, Name, Email, Password)
+                // Ensure at least 4 fields (student ID, name, email, password)
                 if (studentInfo.length >= 4) {
-                    String studentName = studentInfo[1];   // Student name (column 2)
-                    String csvEmail = studentInfo[2];      // Email (column 3)
-                    String csvPassword = studentInfo[3];   // Password (column 4)
+                    String Name = studentInfo[1];   // Student name (column 2)
+                    String Email = studentInfo[2];      // Email (column 3)
+                    String Password = studentInfo[3];   // Password (column 4)
                     
-                    // Match email (case insensitive)
-                    if (csvEmail.equalsIgnoreCase(email)) {
-                        // Validate password
-                        if (csvPassword.equals(password)) {
+                    // Match email (case-insensitive)
+                    if (Email.equalsIgnoreCase(email)) {
+                        // Verify password
+                        if (Password.equals(password)) {
                             // Login successful
-                            System.out.println("Login successful: " + studentName + " (" + email + ")");
+                            System.out.println("Login successful: " + Name + " (" + email + ")");
                             return "SUCCESS";
                         } else {
                             // Password error
